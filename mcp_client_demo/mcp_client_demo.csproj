@@ -19,10 +19,10 @@
 
   <ItemGroup>
     <PackageReference Include="dotenv.net" Version="3.2.1" />
-    <PackageReference Include="mcpdotnet" Version="1.1.0.1" />
     <PackageReference Include="McpDotNet.Extensions.AI" Version="1.1.0.1" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.3.0-preview.1.25161.3" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.3.0-preview.1.25161.3" />
+    <PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.2" />
   </ItemGroup>
 
 </Project>
