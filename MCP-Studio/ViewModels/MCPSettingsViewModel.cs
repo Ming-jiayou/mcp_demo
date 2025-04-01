@@ -12,14 +12,13 @@ using System.Text.Json.Serialization;
 using MCP_Studio.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Avalonia.Styling;
-using McpDotNet.Configuration;
-using McpDotNet.Protocol.Transport;
-using McpDotNet.Protocol.Types;
-using McpDotNet.Client;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging.Abstractions;
-using McpDotNet.Extensions.AI;
 using Microsoft.Extensions.AI;
+using ModelContextProtocol.Client;
+using ModelContextProtocol;
+using ModelContextProtocol.Protocol.Transport;
+using ModelContextProtocol.Protocol.Types;
 
 namespace MCP_Studio.ViewModels;
 
@@ -71,7 +70,7 @@ public partial class MCPSettingsViewModel : ViewModelBase
     {
         McpClientOptions options = new()
         {
-            ClientInfo = new() { Name = "MCP-Studio", Version = "1.0.0" }
+            ClientInfo = new() { Name = "AIE-Studio", Version = "1.0.0" }
         };
 
         List<McpServerConfig> mcpServerConfigs = new List<McpServerConfig>();
@@ -92,69 +91,18 @@ public partial class MCPSettingsViewModel : ViewModelBase
             mcpServerConfigs.Add(config);
         }
 
-        var factory = new McpClientFactory(
-               mcpServerConfigs,
-               options,
-               NullLoggerFactory.Instance
-           );
-
-        foreach (var server in ServerList)
+        foreach (var config in mcpServerConfigs)
         {
-            var client = await factory.GetClientAsync(server.Name);
+            var client = await McpClientFactory.CreateAsync(config);
             var listToolsResult = await client.ListToolsAsync();
-            server.Tools = listToolsResult.Tools;
-        }  
+            ServerList.Where(s => s.Name == config.Name).First().Tools = listToolsResult;
+        }         
     }
 
     [RelayCommand]
     private async Task Test()
     {       
-        McpClientOptions options = new()
-        {
-            ClientInfo = new() { Name = "MCP-Studio", Version = "1.0.0" }
-        };
-
-        List<McpServerConfig> mcpServerConfigs = new List<McpServerConfig>();
-
-        foreach(var server in ServerList)
-        {
-            McpServerConfig config = new()
-            {
-                Id = server.Name,
-                Name = server.Name,
-                TransportType = TransportTypes.StdIo,
-                TransportOptions = new()
-                {
-                    ["command"] = server.Command,
-                    ["arguments"] = server.Args
-                }
-            };
-            mcpServerConfigs.Add(config);
-        }
-
-        var factory = new McpClientFactory(
-               mcpServerConfigs,
-               options,
-               NullLoggerFactory.Instance
-           );
-
-       List<IMcpClient> clients = new List<IMcpClient>();
-       foreach(var server in ServerList)
-        {
-            var client = await factory.GetClientAsync(server.Name);
-            clients.Add(client);
-        }
-
-       List<ListToolsResult> listToolsResults = new List<ListToolsResult>();
-       List<AITool> tools = new List<AITool>();
-       foreach(var client in clients)
-       {
-            var listToolsResult = await client.ListToolsAsync();
-            var mappedTools = listToolsResult.Tools.Select(t => t.ToAITool(client)).ToList();
-
-            listToolsResults.Add(listToolsResult);
-            tools.AddRange(mappedTools);
-        }       
+        
     }
 
 

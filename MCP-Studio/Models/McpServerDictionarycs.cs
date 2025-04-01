@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MCP_Studio.ViewModels;
-using McpDotNet.Protocol.Types;
-using System;
+using ModelContextProtocol.Client;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -26,7 +25,7 @@ namespace MCP_Studio.Models
         [ObservableProperty]
         private string args;
         [ObservableProperty]
-        private List<Tool> tools;
+        private IList<McpClientTool> tools;
     }
 
     public class McpServerDictionary

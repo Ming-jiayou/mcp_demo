@@ -1,14 +1,13 @@
-﻿using McpDotNet.Client;
-using McpDotNet.Configuration;
-using McpDotNet.Extensions.AI;
-using McpDotNet.Protocol.Transport;
-using Microsoft.Extensions.AI;
+﻿using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging.Abstractions;
 using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
 using System.Linq;
 using dotenv.net;
+using ModelContextProtocol.Client;
+using ModelContextProtocol;
+using ModelContextProtocol.Protocol.Transport;
 
 
 namespace mcp_client_demo
@@ -46,7 +45,7 @@ namespace mcp_client_demo
             ];
         }
 
-        public async Task<string> ProcessQueryAsync(string query, List<AITool> tools)
+        public async Task<string> ProcessQueryAsync(string query, IList<McpClientTool> tools)
         {
             if(Messages.Count == 0)
             {
@@ -60,9 +59,12 @@ namespace mcp_client_demo
             // Add a user message
             Messages.Add(new(ChatRole.User, query));
 
-            var response = await ChatClient.GetResponseAsync(
-                   Messages,
-                   new() { Tools = tools });
+            var options = new ChatOptions
+            {               
+                Tools = [.. tools]
+            };
+
+            var response = await ChatClient.GetResponseAsync(Messages,options);
             Messages.AddMessages(response);
             var toolUseMessage = response.Messages.Where(m => m.Role == ChatRole.Tool);
             if (response.Messages[0].Contents.Count > 1)
@@ -123,13 +125,9 @@ namespace mcp_client_demo
                 }
             };
 
-            var factory = new McpClientFactory(
-                new[] { config },
-                options,
-                NullLoggerFactory.Instance
-            );
+            var client = await McpClientFactory.CreateAsync(config);
 
-            return await factory.GetClientAsync("test");
+            return client;
         }
  
         async static Task Main(string[] args)
@@ -142,9 +140,9 @@ namespace mcp_client_demo
             Console.WriteLine("MCP 'everything' server initialized");          
             Console.WriteLine("Listing tools...");
             var listToolsResult = await client.ListToolsAsync();
-            var mappedTools = listToolsResult.Tools.Select(t => t.ToAITool(client)).ToList();
+            //var mappedTools = listToolsResult.Tools.Select(t => t.ToAITool(client)).ToList();
             Console.WriteLine("Tools available:");
-            foreach (var tool in mappedTools)
+            foreach (var tool in listToolsResult)
             {
                 Console.WriteLine("  " + tool);
             }
@@ -170,7 +168,7 @@ namespace mcp_client_demo
                     }
                     else 
                     {
-                        string response = await chatDemo.ProcessQueryAsync(query, mappedTools);
+                        string response = await chatDemo.ProcessQueryAsync(query, listToolsResult);
                         Console.ForegroundColor = ConsoleColor.DarkYellow;
                         Console.WriteLine($"AI回答：{response}");
                         Console.ForegroundColor = ConsoleColor.White;

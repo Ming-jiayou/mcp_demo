@@ -14,8 +14,10 @@ using System.Threading.Tasks;
 using MCP_Studio.Service;
 using System.Linq;
 using System.Collections.ObjectModel;
-using McpDotNet.Protocol.Types;
 using System.Text;
+using ModelContextProtocol.Client;
+using Microsoft.Extensions.Options;
+using ModelContextProtocol.Protocol.Types;
 
 namespace MCP_Studio.ViewModels;
 
@@ -25,7 +27,7 @@ public partial class ChatViewModel : ViewModelBase
     public ObservableCollection<MessageInfo>? MessageInfos { get; set; }
     public List<Microsoft.Extensions.AI.ChatMessage>? Messages {  get; set; }
     public IChatClient? ChatClient {  get; set; }
-    public List<AITool>? Tools { get; set; }
+    public List<McpClientTool>? Tools { get; set; }
     public ChatViewModel()
     {
         InitializeAsync();
@@ -95,10 +97,14 @@ public partial class ChatViewModel : ViewModelBase
 
         MessageInfos.Add(new("User", message));
         Messages.Add(new(ChatRole.User, message));
-    
-        var response = await ChatClient.GetResponseAsync(
-               Messages,
-               new() { Tools = Tools });
+
+        var options = new ChatOptions
+        {
+            Tools = [.. Tools]
+        };
+
+
+        var response = await ChatClient.GetResponseAsync(Messages,options);
 
         Messages.AddMessages(response);
 
@@ -167,9 +173,13 @@ public partial class ChatViewModel : ViewModelBase
             messages.Add(new(ChatRole.User, query));
 
             var tools = await MCPService.GetToolsAsync();
-            var response = await chatClient.GetResponseAsync(
-                   messages,
-                   new() { Tools = tools });
+
+            var options = new ChatOptions
+            {
+                Tools = [.. tools]
+            };
+
+            var response = await chatClient.GetResponseAsync(messages,options);
 
             messages.AddMessages(response);
             var toolUseMessage = response.Messages.Where(m => m.Role == ChatRole.Tool);

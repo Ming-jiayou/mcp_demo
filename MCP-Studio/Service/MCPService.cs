@@ -1,23 +1,22 @@
-﻿using McpDotNet.Client;
-using McpDotNet.Protocol.Transport;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MCP_Studio.Models;
-using McpDotNet.Configuration;
 using System.Text.Json;
 using System.IO;
-using McpDotNet.Extensions.AI;
 using Microsoft.Extensions.AI;
+using ModelContextProtocol.Client;
+using ModelContextProtocol;
+using ModelContextProtocol.Protocol.Transport;
 
 namespace MCP_Studio.Service
 {
     public static class MCPService
     {      
-        public static async Task<List<AITool>?> GetToolsAsync()
+        public static async Task<List<McpClientTool>?> GetToolsAsync()
         {
             var serverList = new List<MCPServerConfig>();
             try
@@ -39,7 +38,7 @@ namespace MCP_Studio.Service
 
                 McpClientOptions options = new()
                 {
-                    ClientInfo = new() { Name = "MCP-Studio", Version = "1.0.0" }
+                    ClientInfo = new() { Name = "AIE-Studio", Version = "1.0.0" }
                 };
 
                 List<McpServerConfig> mcpServerConfigs = new List<McpServerConfig>();
@@ -60,19 +59,15 @@ namespace MCP_Studio.Service
                     mcpServerConfigs.Add(config);
                 }
 
-                var factory = new McpClientFactory(
-                       mcpServerConfigs,
-                       options,
-                       NullLoggerFactory.Instance
-                   );
-                List<AITool> mappedTools = new List<AITool>();
-                foreach (var server in serverList)
+                List<McpClientTool> mappedTools = new List<McpClientTool>();
+
+                foreach (var config in mcpServerConfigs)
                 {
-                    var client = await factory.GetClientAsync(server.Name);
+                    var client = await McpClientFactory.CreateAsync(config);
                     var listToolsResult = await client.ListToolsAsync();
-                    server.Tools = listToolsResult.Tools;
-                    mappedTools.AddRange(listToolsResult.Tools.Select(t => t.ToAITool(client)).ToList());
+                    mappedTools.AddRange(listToolsResult);
                 }
+
                 return mappedTools;
             }
             catch (Exception ex)
