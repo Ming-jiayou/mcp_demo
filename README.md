@@ -1,3 +1,5 @@
+[简体中文](./README.zh.md) | English
+
 # Building a Simple Cross-Platform MCP Client using Avalonia/C#
 
 ## Introduction

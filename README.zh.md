@@ -1,3 +1,5 @@
+简体中文|[English](./README.md) 
+
 # 使用Avalonia/C#构建一个简易的跨平台MCP客户端
 
 ## 前言
