@@ -1,20 +1,22 @@
-# 使用Avalonia/C#构建一个简易的跨平台MCP客户端
+# Building a Simple Cross-Platform MCP Client using Avalonia/C#
 
-## 前言
+## Introduction
 
-前几天介绍了在C#中构建一个MCP客户端。
+A few days ago, I introduced building a MCPclient in C#.
 
-最近正在学习Avalonia，所以就想用Avalonia实现一个简易的跨平台MCP客户端。接入别人写的或者自己写的MCP服务器就可以利用AI做很多有意思的事情。
+Recently, I've been learning Avalonia, so I wanted to use Avalonia to implement a simple cross-platform MCP client.
 
-接下来我有时间也会和大家继续分享一些好玩的MCP服务器。
+By connecting to someone else's or my own MCP server, I can leverage AI to do many interesting things.
 
-## 效果
+Next, when I have time, I will also share some fun MCP servers with everyone.
 
-展示连接的MCP服务器的工具：
+## Effect
+
+Tools possessed by the connected MCP server:
 
 ![image-20250318174336737](https://mingupupup.oss-cn-wuhan-lr.aliyuncs.com/imgs/image-20250318174336737.png)
 
-使用这些MCP服务器：
+Utilizing these MCP servers:
 
 duckduckgo_mcp
 
@@ -28,49 +30,49 @@ sqlite-mcp
 
 ![image-20250318175711695](https://mingupupup.oss-cn-wuhan-lr.aliyuncs.com/imgs/image-20250318175711695.png)
 
-由于模型的原因有时候可能没法一次就成功。
+Due to the model, it may not be possible to succeed at once sometimes.
 
-问AI这个问题：“获取products表中所有保质期大于30天的商品信息”。
+Ask AI the question: "Retrieve all product information from the products table where the shelf life is greater than 30 days".
 
 ![image-20250318180038096](https://mingupupup.oss-cn-wuhan-lr.aliyuncs.com/imgs/image-20250318180038096.png)
 
 ![image-20250318180054915](https://mingupupup.oss-cn-wuhan-lr.aliyuncs.com/imgs/image-20250318180054915.png)
 
-中文显示还有问题，但是数据确实是从数据库中读取出来的了。
+The Chinese display still has issues, but the data has indeed been retrieved from the database.
 
-## 实践
+## Practice
 
 ```cmd
 git clone https://github.com/Ming-jiayou/mcp_demo.git
 ```
 
-进入mcp_demo\MCP-Studio文件夹，将ChatModelSettings.json.example修改为ChatModelSettings.json，填入大模型信息，以硅基流动为例：
+Enter the mcp_demo\MCP-Studio folder, rename ChatModelSettings.json.example to ChatModelSettings.json, and fill in the large model information, for example, with Silicon Flow:
 
 ![image-20250318181015554](https://mingupupup.oss-cn-wuhan-lr.aliyuncs.com/imgs/image-20250318181015554.png)
 
-打开mcp_settings.json设置你的MCP服务器，我的示例如下所示：
+Open mcp_settings.json to configure your MCP server, my example is as follows:
 
 ![image-20250318181133621](https://mingupupup.oss-cn-wuhan-lr.aliyuncs.com/imgs/image-20250318181133621.png)
 
-运行程序。
+Run the program.
 
-在MCPSettings页如果能显示MCP服务器的工具，说明服务器连接成功。
+If the MCP server tools can be displayed on the MCP Settings page, it indicates that the server connection is successful.
 
 ![image-20250318181230749](https://mingupupup.oss-cn-wuhan-lr.aliyuncs.com/imgs/image-20250318181230749.png)
 
-现在就可以玩耍这些MCP服务器咯，不过要注意得用一个有工具调用能力的模型哦！！
+Now you can play with these MCP servers, but remember to use a model with tool use capabilities!
 
-全部代码已经放到GitHub，地址：https://github.com/Ming-jiayou/mcp_demo。
+The complete code has been uploaded to GitHub, located at: https://github.com/Ming-jiayou/mcp_demo.
 
-**推荐阅读**
+**Recommended Reading**
 
-[使用C#创建一个MCP客户端](https://mp.weixin.qq.com/s/Jd6irZiwKuRn3IselQAhNQ)
+[Creating an MCP Client using C#](https://mp.weixin.qq.com/s/Jd6irZiwKuRn3IselQAhNQ)
 
-[一起来玩mcp_server_sqlite，让AI帮你做增删改查！！](https://mp.weixin.qq.com/s/dASBZQfC3aWsw_85V2tn-g)
+[Let's play with mcp_server_sqlite and have AI help you with CRUD (Create, Read, Update, Delete) operations!](https://mp.weixin.qq.com/s/dASBZQfC3aWsw_85V2tn-g)
 
-[通过fetch_mcp，让Cline能够获取网页内容。](https://mp.weixin.qq.com/s/iG2cFhYf0tAqQTxfKtlsQw)
+[Using fetch_mcp to enable Cline to fetch and retrieve web content.](https://mp.weixin.qq.com/s/iG2cFhYf0tAqQTxfKtlsQw)
 
-[创建一个MCP服务器，并在Cline中使用，增强自定义功能。](https://mp.weixin.qq.com/s/nkJ3pqvsBX7HQEkTVI0Fvw)
+[Create an MCP server and use it in Cline to enhance custom functionality.](https://mp.weixin.qq.com/s/nkJ3pqvsBX7HQEkTVI0Fvw)
 
 
 
