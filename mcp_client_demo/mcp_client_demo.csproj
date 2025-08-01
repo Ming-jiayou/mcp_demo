@@ -18,10 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="dotenv.net" Version="3.2.1" />
-    <PackageReference Include="Microsoft.Extensions.AI" Version="9.3.0-preview.1.25161.3" />
-    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.3.0-preview.1.25161.3" />
-    <PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.4" />
+    <PackageReference Include="dotenv.net" Version="4.0.0" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="9.7.1" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.7.1-preview.1.25365.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0-preview.6.25358.103" />
+    <PackageReference Include="ModelContextProtocol" Version="0.3.0-preview.3" />
   </ItemGroup>
 
 </Project>

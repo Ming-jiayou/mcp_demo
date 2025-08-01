@@ -1,13 +1,17 @@
-﻿using Microsoft.Extensions.AI;
+﻿using dotenv.net;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using ModelContextProtocol;
+using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol;
 using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
+using System.Data.SqlTypes;
+using System.IO;
 using System.Linq;
-using dotenv.net;
-using ModelContextProtocol.Client;
-using ModelContextProtocol;
-using ModelContextProtocol.Protocol.Transport;
+using static System.Net.Mime.MediaTypeNames;
 
 
 namespace mcp_client_demo
@@ -30,11 +34,15 @@ namespace mcp_client_demo
             OpenAIClientOptions openAIClientOptions = new OpenAIClientOptions();
             openAIClientOptions.Endpoint = new Uri(envVars["BaseURL"]);
 
-            IChatClient openaiClient = new OpenAIClient(apiKeyCredential, openAIClientOptions)
-                .AsChatClient(envVars["ModelID"]);
+            //IChatClient openaiClient = new OpenAIClient(apiKeyCredential, openAIClientOptions)
+            //    .AsChatClient(envVars["ModelID"]);
+
+            IChatClient client =
+                        new OpenAI.Chat.ChatClient(envVars["ModelID"], apiKeyCredential, openAIClientOptions)
+                        .AsIChatClient();
 
             // Note: To use the ChatClientBuilder you need to install the Microsoft.Extensions.AI package
-            ChatClient = new ChatClientBuilder(openaiClient)
+            ChatClient = new ChatClientBuilder(client)
                 .UseFunctionInvocation()
                 .Build();
 
@@ -64,7 +72,7 @@ namespace mcp_client_demo
                 Tools = [.. tools]
             };
 
-            var response = await ChatClient.GetResponseAsync(Messages,options);
+            var response = await ChatClient.GetResponseAsync(Messages, options);
             Messages.AddMessages(response);
             var toolUseMessage = response.Messages.Where(m => m.Role == ChatRole.Tool);
             if (response.Messages[0].Contents.Count > 1)
@@ -101,6 +109,33 @@ namespace mcp_client_demo
             Console.ForegroundColor = ConsoleColor.White;
             return response.Text;
         }
+
+        public async Task<string> ProcessQueryAsync2(string query, IList<McpClientTool> tools)
+        {
+            if (Messages.Count == 0)
+            {
+                Messages =
+                [
+                 // Add a system message
+                new(ChatRole.System, "You are a helpful assistant, helping us test MCP server functionality."),
+                ];
+            }
+
+            // Add a user message
+            Messages.Add(new(ChatRole.User, query));
+
+            var options = new ChatOptions
+            {
+                Tools = [.. tools]
+            };
+
+            await foreach (var message in ChatClient.GetStreamingResponseAsync(query, options))
+            {
+                Console.Write(message);
+            }
+            Console.WriteLine();
+            return "ok";
+        }
     }
     internal class Program
     {
@@ -108,36 +143,62 @@ namespace mcp_client_demo
         {
             DotEnv.Load();
             var envVars = DotEnv.Read();
-            McpClientOptions options = new()
-            {
-                ClientInfo = new() { Name = "SimpleToolsConsole", Version = "1.0.0" }
-            };
 
-            var config = new McpServerConfig
+            var clientTransport = new StdioClientTransport(new()
             {
-                Id = "test",
-                Name = "Test",
-                TransportType = TransportTypes.StdIo,
-                TransportOptions = new Dictionary<string, string>
-                {
-                    ["command"] = envVars["MCPCommand"],
-                    ["arguments"] = envVars["MCPArguments"],
-                }
-            };
+                Name = "Demo Server",
+                Command = "dotnet",
+                Arguments = ["run", "--project", "D:\\Learning\\MyProject\\AI-Related\\mcp_demo\\stdio_mcp_server_demo\\../stdio_mcp_server_demo"],
+            });
 
-            var client = await McpClientFactory.CreateAsync(config);
+
+            var client = await McpClientFactory.CreateAsync(clientTransport);
 
             return client;
         }
- 
+
+        //private static async Task<IMcpClient?> GetMcpClientAsync2()
+        //{
+        //    var serverUrl = "http://localhost:5050";
+
+        //    Console.WriteLine("C# Runner MCP Client");
+        //    Console.WriteLine($"Connecting to weather server at {serverUrl}...");
+        //    Console.WriteLine();
+
+        //    var options = new SseClientTransportOptions();
+
+        //    var serverConfig = new McpServerConfig
+        //    {
+        //        Id = "weather",
+        //        Name = "Weather Server",
+        //        TransportType = TransportTypes.Sse,
+        //        Location = serverUrl,
+        //    };
+        //    var transport = new SseClientTransport(options, serverConfig,null);
+
+        //    var client = await McpClientFactory.CreateAsync(transport);
+
+        //    var tools = await client.ListToolsAsync();
+        //    if (tools.Count == 0)
+        //    {
+        //        Console.WriteLine("No tools available on the server.");
+        //        return null;
+        //    }
+
+        //    Console.WriteLine($"Found {tools.Count} tools on the server.");
+        //    Console.WriteLine();
+        
+        //    return client;
+        //}
+
         async static Task Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;  // 设置输出编码
             Console.InputEncoding = System.Text.Encoding.UTF8;   // 设置输入编码
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("Initializing MCP 'fetch' server");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("Initializing MCP 'demo' server");
             var client = await GetMcpClientAsync();
-            Console.WriteLine("MCP 'everything' server initialized");          
+            Console.WriteLine("MCP 'demo' server initialized");          
             Console.WriteLine("Listing tools...");
             var listToolsResult = await client.ListToolsAsync();
             //var mappedTools = listToolsResult.Tools.Select(t => t.ToAITool(client)).ToList();

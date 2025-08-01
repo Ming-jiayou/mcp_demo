@@ -32,4 +32,10 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         CurrentPage = new MCPSettingsViewModel();
     }
+
+    [RelayCommand]
+    private void NavigateToTTS()
+    {
+        CurrentPage = new TTSViewModel();
+    }
 }

@@ -55,6 +55,18 @@
 					</StackPanel>
 				</Button>
 
+				<Button Name="TTSButton"
+					   Command="{Binding NavigateToTTSCommand}"
+					   HorizontalAlignment="Stretch"
+					   Height="50"
+					   Margin="10,5"
+					   Classes="NavButton">
+					<StackPanel Orientation="Horizontal">
+						<materialIcons:MaterialIcon Kind="MicrophoneMessage" Margin="5"/>
+						<TextBlock Text="TTS" VerticalAlignment="Center" FontSize="15"/>
+					</StackPanel>
+				</Button>
+
                 <Button Name="SettingsButton"
                         Command="{Binding NavigateToSettingsCommand}"
                         HorizontalAlignment="Stretch"
