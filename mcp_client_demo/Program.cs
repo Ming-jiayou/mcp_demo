@@ -12,6 +12,7 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using static System.Net.Mime.MediaTypeNames;
+using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
 
 namespace mcp_client_demo
@@ -43,8 +44,8 @@ namespace mcp_client_demo
 
             // Note: To use the ChatClientBuilder you need to install the Microsoft.Extensions.AI package
             ChatClient = new ChatClientBuilder(client)
-                .UseFunctionInvocation()
-                .Build();
+                 .UseFunctionInvocation()
+                 .Build();
 
             Messages =
             [
@@ -110,7 +111,7 @@ namespace mcp_client_demo
             return response.Text;
         }
 
-        public async Task<string> ProcessQueryAsync2(string query, IList<McpClientTool> tools)
+        public async Task ProcessQueryAsync2(string query, IList<McpClientTool> tools)
         {
             if (Messages.Count == 0)
             {
@@ -129,12 +130,20 @@ namespace mcp_client_demo
                 Tools = [.. tools]
             };
 
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.Write("AI回答：");
+            string finalResponse = string.Empty;
             await foreach (var message in ChatClient.GetStreamingResponseAsync(query, options))
             {
                 Console.Write(message);
+                finalResponse += message.Text;
             }
             Console.WriteLine();
-            return "ok";
+
+            Messages.AddMessages(new ChatResponse
+            {
+                Messages = [new ChatMessage(ChatRole.Assistant, finalResponse)]
+            });
         }
     }
     internal class Program
@@ -217,7 +226,7 @@ namespace mcp_client_demo
                 try
                 {
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write("\nQuery: ");
+                    Console.Write("Query: ");
                     string query = Console.ReadLine()?.Trim() ?? string.Empty;
 
                     if (query.ToLower() == "quit")
@@ -229,9 +238,8 @@ namespace mcp_client_demo
                     }
                     else 
                     {
-                        string response = await chatDemo.ProcessQueryAsync(query, listToolsResult);
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.WriteLine($"AI回答：{response}");
+                        await chatDemo.ProcessQueryAsync2(query, listToolsResult);                      
+                        //Console.WriteLine($"AI回答：{response}");
                         Console.ForegroundColor = ConsoleColor.White;
                     }                      
                 }
