@@ -11,6 +11,7 @@ using System.ClientModel;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using static System.Net.Mime.MediaTypeNames;
 using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
@@ -92,7 +93,33 @@ namespace mcp_client_demo
                     foreach (var message in toolUseMessage)
                     {
                         var functionResultContent = (FunctionResultContent)message.Contents[0];
-                        Console.WriteLine($"调用工具结果：{functionResultContent.Result}");
+                        try
+                        {
+                            // 解析JSON格式的结果
+                            var jsonDoc = JsonDocument.Parse(functionResultContent.Result?.ToString() ?? "{}");
+                            if (jsonDoc.RootElement.TryGetProperty("content", out var contentElement) &&
+                                contentElement.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var contentItem in contentElement.EnumerateArray())
+                                {
+                                    if (contentItem.TryGetProperty("type", out var typeElement) &&
+                                        typeElement.GetString() == "text" &&
+                                        contentItem.TryGetProperty("text", out var textElement))
+                                    {
+                                        Console.WriteLine($"调用工具结果：{textElement.GetString()}");
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine($"调用工具结果：{functionResultContent.Result}");
+                            }
+                        }
+                        catch (JsonException)
+                        {
+                            // 如果不是JSON格式，直接输出
+                            Console.WriteLine($"调用工具结果：{functionResultContent.Result}");
+                        }
                     }
 
                     Console.ForegroundColor = ConsoleColor.White;
@@ -238,7 +265,7 @@ namespace mcp_client_demo
                     }
                     else 
                     {
-                        await chatDemo.ProcessQueryAsync2(query, listToolsResult);                      
+                        await chatDemo.ProcessQueryAsync(query, listToolsResult);                      
                         //Console.WriteLine($"AI回答：{response}");
                         Console.ForegroundColor = ConsoleColor.White;
                     }                      
