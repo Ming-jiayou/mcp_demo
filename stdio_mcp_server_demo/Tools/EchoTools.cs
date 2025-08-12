@@ -1,9 +1,12 @@
 ﻿using ModelContextProtocol.Server;
+using stdio_mcp_server_demo.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace stdio_mcp_server_demo.Tools
@@ -38,7 +41,54 @@ namespace stdio_mcp_server_demo.Tools
             string result = $"向{Name}发邮件,内容为{Content}，邮件重要程度为{importanceLevel}";
             return result;
         }
+     
+        [McpServerTool, Description("根据学号获取学生")]
+        public async Task<Student> GetStudent(HttpClient client,string studentId)
+        {
+            try
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+                string url = $"https://localhost:7220/api/Student/{studentId}";
+
+                HttpResponseMessage response = await client.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync();
+               
+                    // Deserialize JSON to Student object
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    Student student = JsonSerializer.Deserialize<Student>(jsonResponse, options);
+
+                    return student;
+                }
+                else
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    if (!string.IsNullOrEmpty(errorContent))
+                    {
+                        Console.WriteLine($"Error details: {errorContent}");
+                    }
+
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occurred: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                return null;
+            }
+        }
+    
         public enum ImportanceLevel
         {
             /// <summary>

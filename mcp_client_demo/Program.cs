@@ -121,8 +121,6 @@ namespace mcp_client_demo
                             Console.WriteLine($"调用工具结果：{functionResultContent.Result}");
                         }
                     }
-
-                    Console.ForegroundColor = ConsoleColor.White;
                 }
                 else
                 {
@@ -134,7 +132,8 @@ namespace mcp_client_demo
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("本次没有调用工具");               
             }
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(response.Text);
+            Console.ForegroundColor = ConsoleColor.White;          
             return response.Text;
         }
 
@@ -180,11 +179,14 @@ namespace mcp_client_demo
             DotEnv.Load();
             var envVars = DotEnv.Read();
 
+            // D:\学习\C#学习\mcp_demo\stdio_mcp_server_demo\bin\Debug\net8.0\stdio_mcp_server_demo.exe
+
             var clientTransport = new StdioClientTransport(new()
             {
                 Name = "Demo Server",
-                Command = "dotnet",
-                Arguments = ["run", "--project", "D:\\Learning\\MyProject\\AI-Related\\mcp_demo\\stdio_mcp_server_demo\\../stdio_mcp_server_demo"],
+                Command = "D:\\学习\\C#学习\\mcp_demo\\stdio_mcp_server_demo\\bin\\Debug\\net8.0\\stdio_mcp_server_demo.exe",
+                //Arguments = ["run", "--project", "D:\\学习\\C#学习\\mcp_demo\\stdio_mcp_server_demo\\../stdio_mcp_server_demo"],
+                Arguments = []
             });
 
 
